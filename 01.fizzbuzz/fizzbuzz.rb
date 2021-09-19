@@ -13,5 +13,5 @@ def fizzbuzz(num)
 end
 
 (1..20).each do |num|
-  p fizzbuzz(num)
+  puts fizzbuzz(num)
 end
