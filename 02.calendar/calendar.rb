@@ -21,24 +21,8 @@ class Calendar
     @last_day = get_last_day(year, month)
     @year = get_year(year, month)
     @month = get_month(year, month)
-  end
-
-  def get_table
-    @table = {}
-    @first_day.step(@last_day) do |date|
-      @table[date] = date.strftime("%e")
-    end
-  end
-
-  def get_output
-    copy_table
-    mark_today
-    add_newline_or_space
-    @output = [
-      get_title,
-      get_head_blanks,
-      @output.values.join
-    ].join
+    get_table
+    get_output
   end
 
   def print_output
@@ -74,6 +58,13 @@ class Calendar
     get_first_day(year, month).month
   end
 
+  def get_table
+    @table = {}
+    @first_day.step(@last_day) do |date|
+      @table[date] = date.strftime("%e")
+    end
+  end
+
   def copy_table
     @output = {}
     @table.each do |date, string|
@@ -107,9 +98,18 @@ class Calendar
     "   " * @first_day.wday
   end
 
+  def get_output
+    copy_table
+    mark_today
+    add_newline_or_space
+    @output = [
+      get_title,
+      get_head_blanks,
+      @output.values.join
+    ].join
+  end
+
 end
 
 calendar = Calendar.new(params[:year], params[:month])
-calendar.get_table
-calendar.get_output
 calendar.print_output
