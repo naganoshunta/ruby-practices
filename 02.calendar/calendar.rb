@@ -3,117 +3,119 @@ require 'optparse'
 require 'date'
 
 opts = OptionParser.new
-opts.on("-m", "--month [MONTH]", desc = "表示する月を指定してください") { |month|
+opts.on("-m", "--month [MONTH]", desc = "Specify MONTH (in Integer) for display") { |month|
   month.to_i
 }
-opts.on("-y", "--year [YEAR]", desc = "表示する年を指定してください") { |year|
+opts.on("-y", "--year [YEAR]", desc = "Specify YEAR (in Integer) for display") { |year|
   year.to_i
 }
 params = {}
 opts.parse!(ARGV, into: params)
 
-def valid_date?(params)
-  if Date.valid_date?(params[:year], params[:month], 1)
-    true
-  else
-    false
+class Calendar
+  attr_reader :today, :validity, :first_day, :last_day, :year, :month, :table, :output
+  def initialize(year, month)
+    @today = Date.today
+    @validity = valid_date?(year, month)
+    @first_day = get_first_day(year, month)
+    @last_day = get_last_day(year, month)
+    @year = get_year(year, month)
+    @month = get_month(year, month)
   end
-end
 
-def identify_first_day(params)
-  if valid_date?(params)
-    Date.new(params[:year], params[:month], 1)
-  else
-    Date.new(Date.today.year, Date.today.month, 1)
-  end
-end
-
-def identify_last_day(params)
-  if valid_date?(params)
-    Date.new(params[:year], params[:month], -1)
-  else
-    Date.new(Date.today.year, Date.today.month, -1)
+  def get_table
+    @table = {}
+    @first_day.step(@last_day) do |date|
+      @table[date] = date.strftime("%e")
     end
-end
-
-def identify_year(params)
-  identify_first_day(params).year
-end
-
-def identify_month(params)
-  identify_first_day(params).month
-end
-
-
-def obtain_calendar_info(params)
-  {
-    first_day: identify_first_day(params),
-    last_day: identify_last_day(params),
-    year: identify_year(params),
-    month: identify_month(params),
-    validity: valid_date?(params)
-  }
-end
-
-def obtain_calendar(calendar_info)
-  calendar = {}
-  calendar_info[:first_day].step(calendar_info[:last_day], 1) do |date|
-    calendar[date] = date.strftime("%e")
   end
-  calendar
-end
 
-def mark_today(calendar)
-  calendar[Date.today] = "\e[7m#{calendar[Date.today]}\e[0m" if calendar.has_key?(Date.today)
-  calendar
-end
+  def get_output
+    copy_table
+    mark_today
+    add_newline_or_space
+    @output = [
+      get_title,
+      get_head_blanks,
+      @output.values.join
+    ].join
+  end
 
-def add_newlinechar_and_space(calendar)
-  calendar.each do |date, date_for_display|
-    if date.saturday?
-      calendar[date] = date_for_display + "\n"
+  def print_output
+    print @output
+  end
+
+  private
+  def valid_date?(year, month)
+    Date.valid_date?(year, month, 1)
+  end
+
+  def get_first_day(year, month)
+    if valid_date?(year, month)
+      Date.new(year, month, 1)
     else
-      calendar[date] = date_for_display + " "
+      Date.new(@today.year, @today.month, 1)
     end
   end
-  calendar
-end
 
-def obtain_calendar_for_display(calendar)
-  calendar.values.join
-end
-
-def make_calendar_title(calendar_info)
-  month_year_title = "#{calendar_info[:month]}月 #{calendar_info[:year]}年".center(20)
-  weeks_title = ["日", "月", "火", "水", "木", "金", "土"].join(" ")
-  calendar_title = month_year_title + "\n" + weeks_title + "\n"
-  calendar_title
-end
-
-def make_calendar_head_blanks(calendar_info)
-  calendar_head_blanks = "   " * calendar_info[:first_day].wday
-  calendar_head_blanks
-end
-
-def make_warning_message(calendar_info)
-  if !calendar_info[:validity]
-    "引数が未指定もしくは無効です。今月・今年のカレンダーを表示します。\n"
+  def get_last_day(year, month)
+    if valid_date?(year, month)
+      Date.new(year, month, -1)
+    else
+      Date.new(@today.year, @today.month, -1)
+    end
   end
+
+  def get_year(year, month)
+    get_first_day(year, month).year
+  end
+
+  def get_month(year, month)
+    get_first_day(year, month).month
+  end
+
+  def copy_table
+    @output = {}
+    @table.each do |date, string|
+      @output[date] = string
+    end
+  end
+
+  def invert_color(string)
+    "\e[7m#{string}\e[0m"
+  end
+
+  def mark_today
+    @output.each do |date, string|
+      if date == @today
+        @output[date] = invert_color(string)
+      else
+        @output[date] = string
+      end
+    end
+  end
+
+  def add_newline_or_space
+    @output.each do |date, string|
+      if date.saturday?
+        @output[date] = string + "\n"
+      else
+        @output[date] = string + " "
+      end
+    end
+  end
+
+  def get_title
+    "#{@month}月 #{@year}年".center(20) + "\n" + ["日", "月", "火", "水", "木", "金", "土"].join(" ") + "\n"
+  end
+
+  def get_head_blanks
+    "   " * @first_day.wday
+  end
+
 end
 
-def format_calendar_for_display(calendar_info, calendar_for_display)
-  calendar_title = make_calendar_title(calendar_info)
-  calendar_head_blanks = make_calendar_head_blanks(calendar_info)
-  warning_message = make_warning_message(calendar_info)
-  [warning_message, calendar_title, calendar_head_blanks, calendar_for_display].join
-end
-
-calendar_info = obtain_calendar_info(params)
-calendar = obtain_calendar(calendar_info)
-calendar = mark_today(calendar)
-calendar = add_newlinechar_and_space(calendar)
-calendar_for_display = obtain_calendar_for_display(calendar)
-formatted_calendar = format_calendar_for_display(calendar_info, calendar_for_display)
-
-print formatted_calendar
-
+calendar = Calendar.new(params[:year], params[:month])
+calendar.get_table
+calendar.get_output
+calendar.print_output
