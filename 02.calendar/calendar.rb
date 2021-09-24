@@ -65,29 +65,8 @@ class Calendar
     end
   end
 
-  def copy_table
-    @output = {}
-    @table.each do |date, string|
-      @output[date] = string
-    end
-  end
-
   def invert_color(string)
     "\e[7m#{string}\e[0m"
-  end
-
-  def mark_today
-    @output[@today] = invert_color(@output[@today]) if @output.include?(@today)
-  end
-
-  def add_newline_or_space
-    @output.each do |date, string|
-      if date.saturday?
-        @output[date] = string + "\n"
-      else
-        @output[date] = string + " "
-      end
-    end
   end
 
   def get_title
@@ -99,16 +78,21 @@ class Calendar
   end
 
   def get_output
-    copy_table
-    mark_today
-    add_newline_or_space
-    @output = [
-      get_title,
-      get_head_blanks,
-      @output.values.join
-    ].join
+    @output = [get_title, get_head_blanks]
+    @table.each do |date, string|
+      case
+      when date.saturday? && date == @today
+        @output << invert_color(string) + "\n"
+      when date.saturday? && date != @today
+        @output << string + "\n"
+      when !date.saturday? && date == @today
+        @output << invert_color(string) + " "
+      when !date.saturday? && date != @today
+        @output << string + " "
+      end
+    end
+    @output = @output.join
   end
-
 end
 
 calendar = Calendar.new(params[:year], params[:month])
