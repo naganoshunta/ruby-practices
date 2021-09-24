@@ -83,17 +83,25 @@ class Calendar
     "   " * @first_day.wday
   end
 
+  def is_saturday?(date)
+    date.saturday?
+  end
+
+  def is_today?(date)
+    date == @today
+  end
+
   def get_output
     @output = [get_title, get_head_blanks]
     @table.each do |date, string|
       case
-      when date.saturday? && date == @today
+      when is_saturday?(date) && is_today?(date)
         @output << invert_color(string) + "\n"
-      when date.saturday? && date != @today
+      when is_saturday?(date) && !is_today?(date)
         @output << string + "\n"
-      when !date.saturday? && date == @today
+      when !is_saturday?(date) && is_today?(date)
         @output << invert_color(string) + " "
-      when !date.saturday? && date != @today
+      when !is_saturday?(date) && !is_today?(date)
         @output << string + " "
       end
     end
