@@ -86,13 +86,7 @@ class Calendar
   end
 
   def mark_today
-    @output.each do |date, string|
-      if date == @today
-        @output[date] = invert_color(string)
-      else
-        @output[date] = string
-      end
-    end
+    @output[@today] = invert_color(@output[@today]) if @output.include?(@today)
   end
 
   def add_newline_or_space
