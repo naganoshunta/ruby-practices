@@ -70,7 +70,13 @@ class Calendar
   end
 
   def get_title
-    "#{@month}月 #{@year}年".center(20) + "\n" + ["日", "月", "火", "水", "木", "金", "土"].join(" ") + "\n"
+    [
+      "#{@month}月 #{@year}年".center(20),
+      "\n",
+      ["日", "月", "火", "水", "木", "金", "土"].join(" "),
+      "\n"
+    ].
+    join
   end
 
   def get_head_blanks
