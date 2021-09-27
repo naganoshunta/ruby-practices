@@ -2,15 +2,25 @@
 require 'optparse'
 require 'date'
 
-opts = OptionParser.new
-opts.on("-m", "--month [MONTH]", desc = "Specify MONTH (in Integer) for display") { |month|
-  month.to_i
-}
-opts.on("-y", "--year [YEAR]", desc = "Specify YEAR (in Integer) for display") { |year|
-  year.to_i
-}
-params = {}
-opts.parse!(ARGV, into: params)
+class Options
+  attr_reader :year, :month
+  def initialize
+    get_options
+  end
+
+  private
+
+  def get_options
+    opts = OptionParser.new
+    opts.on("-m", "--month [MONTH]") do |month|
+      @month = month.to_i
+    end
+    opts.on("-y", "--year [YEAR]") do |year|
+      @year = year.to_i
+    end
+    opts.parse!(ARGV)
+  end
+end
 
 class Calendar
   attr_reader :today, :validity, :first_day, :last_day, :year, :month, :table, :output
@@ -30,6 +40,7 @@ class Calendar
   end
 
   private
+  
   def valid_date?(year, month)
     Date.valid_date?(year, month, 1)
   end
@@ -109,5 +120,6 @@ class Calendar
   end
 end
 
-calendar = Calendar.new(params[:year], params[:month])
+options = Options.new
+calendar = Calendar.new(options.year, options.month)
 calendar.print_output
