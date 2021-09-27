@@ -12,13 +12,19 @@ class Options
 
   def get_options
     opts = OptionParser.new
-    opts.on("-m", "--month [MONTH]") do |month|
-      @month = month.to_i
+    opts.on("-m", "--month MONTH", Integer) do |month|
+      @month = month
     end
-    opts.on("-y", "--year [YEAR]") do |year|
-      @year = year.to_i
+    opts.on("-y", "--year YEAR", Integer) do |year|
+      @year = year
     end
-    opts.parse!(ARGV)
+    begin
+      opts.parse!(ARGV)
+    rescue => e
+      puts e.message
+      @month = nil
+      @year = nil
+    end
   end
 end
 
