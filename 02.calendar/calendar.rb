@@ -12,7 +12,7 @@ class Options
 
   def get_options
     opts = OptionParser.new
-    opts.on("-m", "--month MONTH", /(^[1-9]{1}$)|(^1[0-2]{1}$)/, Integer) do |month|
+    opts.on("-m", "--month MONTH", /(^[1-9]$)|(^1[0-2]$)/, Integer) do |month|
       @month = month
     end
     opts.on("-y", "--year YEAR", /^-?\d+$/, Integer) do |year|
