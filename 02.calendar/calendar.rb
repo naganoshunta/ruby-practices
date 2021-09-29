@@ -4,6 +4,7 @@ require 'date'
 
 class Options
   attr_reader :year, :month
+
   def initialize
     get_options
   end
@@ -30,6 +31,7 @@ end
 
 class Calendar
   attr_reader :today, :validity, :first_day, :last_day, :year, :month, :table, :output
+
   def initialize(year, month)
     @today = Date.today
     @validity = valid_date?(year, month)
@@ -92,19 +94,18 @@ class Calendar
       "\n",
       ["日", "月", "火", "水", "木", "金", "土"].join(" "),
       "\n"
-    ].
-    join
+    ].join
   end
 
   def get_head_blanks
     "   " * @first_day.wday
   end
 
-  def is_saturday?(date)
+  def saturday?(date)
     date.saturday?
   end
 
-  def is_today?(date)
+  def today?(date)
     date == @today
   end
 
@@ -112,13 +113,13 @@ class Calendar
     @output = [get_title, get_head_blanks]
     @table.each do |date, string|
       case
-      when is_saturday?(date) && is_today?(date)
+      when saturday?(date) && today?(date)
         @output << invert_color(string) + "\n"
-      when is_saturday?(date) && !is_today?(date)
+      when saturday?(date) && !today?(date)
         @output << string + "\n"
-      when !is_saturday?(date) && is_today?(date)
+      when !saturday?(date) && today?(date)
         @output << invert_color(string) + " "
-      when !is_saturday?(date) && !is_today?(date)
+      when !saturday?(date) && !today?(date)
         @output << string + " "
       end
     end
