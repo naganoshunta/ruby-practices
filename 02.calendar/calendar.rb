@@ -30,8 +30,6 @@ class Options
 end
 
 class Calendar
-  attr_reader :today, :validity, :first_day, :last_day, :year, :month, :date_table, :calendar
-
   def initialize(year, month)
     @today = Date.today
     @validity = valid_date?(year, month)
@@ -40,11 +38,15 @@ class Calendar
     @year = @first_day.year
     @month = @first_day.month
     generate_date_table
-    generate_calendar
   end
 
   def output
-    print @calendar
+    [
+      calendar_title,
+      calendar_head_blank,
+      @date_table.values.join,
+      "\n"
+    ].join
   end
 
   private
@@ -104,17 +106,8 @@ class Calendar
   def calendar_head_blank
     '   ' * @first_day.wday
   end
-
-  def generate_calendar
-    @calendar = [
-      calendar_title,
-      calendar_head_blank,
-      @date_table.values.join,
-      "\n"
-    ].join
-  end
 end
 
 options = Options.new
 calendar = Calendar.new(options.year, options.month)
-calendar.output
+print calendar.output
