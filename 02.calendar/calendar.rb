@@ -32,7 +32,6 @@ end
 class Calendar
   def initialize(year, month)
     @today = Date.today
-    @validity = valid_date?(year, month)
     @first_day = identify_first_day(year, month)
     @last_day = identify_last_day(year, month)
     @year = @first_day.year
@@ -40,7 +39,7 @@ class Calendar
     generate_date_table
   end
 
-  def output
+  def format
     [
       calendar_title,
       calendar_head_blank,
@@ -110,4 +109,4 @@ end
 
 options = Options.new
 calendar = Calendar.new(options.year, options.month)
-print calendar.output
+print calendar.format
