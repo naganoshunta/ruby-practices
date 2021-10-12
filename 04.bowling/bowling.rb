@@ -44,8 +44,8 @@ module Bowling
   end
 
   class Scorer
-    def self.calculate(scoresheet)
-      new.calculate(scoresheet.frames)
+    def self.calculate(frames)
+      new.calculate(frames)
     end
 
     def calculate(frames)
@@ -100,5 +100,5 @@ end
 if $PROGRAM_NAME == __FILE__
   score = ARGV[0]
   scoresheet = Bowling::ScoreSheet.new(score)
-  puts Bowling::Scorer.calculate(scoresheet)
+  puts Bowling::Scorer.calculate(scoresheet.frames)
 end
