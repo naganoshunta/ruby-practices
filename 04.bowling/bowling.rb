@@ -32,16 +32,17 @@ module Bowling
 
     def convert_shots_to_frames(shots)
       frames = {}
+      shot_id = 0
       (1..9).each do |id|
-        frames[id] = shots.shift(2)
+        frames[id] = shots[shot_id, 2] || []
+        shot_id += 2
       end
-      frames[10] = shots.shift(shots.size)
+      frames[10] = shots[18..-1] || []
       frames.each_value do |frame|
         frame.delete('no shot')
       end
       frames
     end
-  end
 
   class Scorer
     def self.calculate(frames)
