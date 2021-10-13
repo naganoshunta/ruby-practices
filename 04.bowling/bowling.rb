@@ -43,6 +43,7 @@ module Bowling
       end
       frames
     end
+  end
 
   class Scorer
     def self.calculate(frames)
