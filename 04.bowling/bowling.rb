@@ -64,14 +64,13 @@ class BowlingScorer
 
   def calculate_strike_points(frames)
     strike_points = 0
-    strike_points += frames[10][0] + frames[10][1] if strike?(frames[9])
     frames.each do |id, current_frame|
-      break if id == 9
+      break if id == 10
 
-      if strike?(current_frame) && strike?(frames[id + 1])
+      if strike?(current_frame) && strike?(frames[id + 1]) && id != 9
         strike_points += frames[id + 1][0] + frames[id + 2][0]
       elsif strike?(current_frame)
-        strike_points += frames[id + 1].sum
+        strike_points += frames[id + 1][0, 2].sum
       end
     end
     strike_points
