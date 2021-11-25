@@ -19,13 +19,10 @@ def ls(path)
 end
 
 def read_files(path)
-  if File.directory?(path)
-    Dir.glob('*', base: path)
-  elsif File.file?(path)
-    [path]
-  else
-    raise ArgumentError, "無効なパスです：#{path}"
-  end
+  raise ArgumentError, "#{File.basename(__FILE__)}: #{path}: No such file or directory" unless File.exist?(path) || File.symlink?(path)
+  return Dir.glob('*', base: path) if File.directory?(path)
+
+  [path]
 end
 
 def calculate_row_count(files)
