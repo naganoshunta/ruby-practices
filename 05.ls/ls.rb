@@ -9,10 +9,12 @@ def main
 end
 
 def ls(path)
-  files            = read_files(path)
-  row_count        = calculate_row_count(files)
-  max_width        = calculate_max_width(files)
-  formatted_files  = format_files(files, row_count)
+  files = read_files(path)
+  return if files.empty?
+
+  row_count       = calculate_row_count(files)
+  max_width       = calculate_max_width(files)
+  formatted_files = format_files(files, row_count)
   printf_files(formatted_files, max_width)
 end
 
