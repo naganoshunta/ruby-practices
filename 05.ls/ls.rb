@@ -60,11 +60,7 @@ end
 
 def calculate_row_count(files:)
   column_count = calculate_column_count(files: files)
-  if (files.size % column_count).zero?
-    files.size / column_count
-  else
-    files.size / column_count + 1
-  end
+  (files.size.to_f / column_count).ceil
 end
 
 def calculate_max_width(files:, margin: 1)
