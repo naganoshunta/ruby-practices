@@ -5,15 +5,19 @@ MAX_COLUMN_COUNT = 3
 
 def main
   path = ARGV[0] || Dir.pwd
-  ls(path: path)
+  ls(path)
 end
 
-def ls(path:)
-  files = read_files(path: path)
-  printf_files(files: files)
+def ls(path)
+  files            = read_files(path)
+  column_count     = calculate_column_count(files)
+  row_count        = calculate_row_count(files, column_count)
+  max_width        = calculate_max_width(files)
+  formatted_files  = format_files(files, column_count, row_count)
+  printf_files(formatted_files, max_width)
 end
 
-def read_files(path:)
+def read_files(path)
   if File.directory?(path)
     Dir.glob('*', base: path)
   elsif File.file?(path)
@@ -23,24 +27,23 @@ def read_files(path:)
   end
 end
 
-def printf_files(files:)
-  format_specifier = generate_format_specifier(files: files)
-  formatted_files  = format_files(files: files)
-  formatted_files.each do |formatted_file|
-    printf format_specifier, *formatted_file
+def calculate_column_count(files)
+  if files.size > MAX_COLUMN_COUNT
+    MAX_COLUMN_COUNT
+  else
+    files.size
   end
 end
 
-def generate_format_specifier(files:)
-  column_count          = calculate_column_count(files: files)
-  max_width             = calculate_max_width(files: files)
-  base_format_specifier = "%-#{max_width}s"
-  "#{base_format_specifier * column_count}\n"
+def calculate_row_count(files, column_count)
+  (files.size.to_f / column_count).ceil
 end
 
-def format_files(files:)
-  column_count = calculate_column_count(files: files)
-  row_count    = calculate_row_count(files: files)
+def calculate_max_width(files, margin = 1)
+  files.map(&:length).max + margin
+end
+
+def format_files(files, column_count, row_count)
   sliced_files = files.each_slice(row_count).to_a
   unless (files.size % column_count).zero?
     (row_count - sliced_files.last.size).times do
@@ -50,21 +53,16 @@ def format_files(files:)
   sliced_files.transpose
 end
 
-def calculate_column_count(files:)
-  if files.size > MAX_COLUMN_COUNT
-    MAX_COLUMN_COUNT
-  else
-    files.size
+def printf_files(formatted_files, max_width)
+  formatted_files.each do |formatted_file|
+    format_specifier = generate_format_specifier(formatted_file.size, max_width)
+    printf format_specifier, *formatted_file
   end
 end
 
-def calculate_row_count(files:)
-  column_count = calculate_column_count(files: files)
-  (files.size.to_f / column_count).ceil
-end
-
-def calculate_max_width(files:, margin: 1)
-  files.map(&:length).max + margin
+def generate_format_specifier(column_count, max_width)
+  base_format_specifier = "%-#{max_width}s"
+  "#{base_format_specifier * column_count}\n"
 end
 
 main if __FILE__ == $PROGRAM_NAME
