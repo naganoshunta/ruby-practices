@@ -41,9 +41,8 @@ end
 def format_files(files:)
   column_count = calculate_column_count(files: files)
   row_count    = calculate_row_count(files: files)
-  file_count   = calculate_file_count(files: files)
   sliced_files = files.each_slice(row_count).to_a
-  unless (file_count % column_count).zero?
+  unless (files.size % column_count).zero?
     (row_count - sliced_files.last.size).times do
       sliced_files.last << nil
     end
@@ -52,30 +51,24 @@ def format_files(files:)
 end
 
 def calculate_column_count(files:)
-  file_count = calculate_file_count(files: files)
-  if file_count > MAX_COLUMN_COUNT
+  if files.size > MAX_COLUMN_COUNT
     MAX_COLUMN_COUNT
   else
-    file_count
+    files.size
   end
 end
 
 def calculate_row_count(files:)
   column_count = calculate_column_count(files: files)
-  file_count   = calculate_file_count(files: files)
-  if (file_count % column_count).zero?
-    file_count / column_count
+  if (files.size % column_count).zero?
+    files.size / column_count
   else
-    file_count / column_count + 1
+    files.size / column_count + 1
   end
 end
 
 def calculate_max_width(files:, margin: 1)
   files.map(&:length).max + margin
-end
-
-def calculate_file_count(files:)
-  files.size
 end
 
 main if __FILE__ == $PROGRAM_NAME
