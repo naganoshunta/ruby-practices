@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-MAX_COLUMN_COUNT = 3
+COLUMN_COUNT = 3
 
 def main
   path = ARGV[0] || Dir.pwd
@@ -10,10 +10,9 @@ end
 
 def ls(path)
   files            = read_files(path)
-  column_count     = calculate_column_count(files)
-  row_count        = calculate_row_count(files, column_count)
+  row_count        = calculate_row_count(files)
   max_width        = calculate_max_width(files)
-  formatted_files  = format_files(files, column_count, row_count)
+  formatted_files  = format_files(files, row_count)
   printf_files(formatted_files, max_width)
 end
 
@@ -27,25 +26,17 @@ def read_files(path)
   end
 end
 
-def calculate_column_count(files)
-  if files.size > MAX_COLUMN_COUNT
-    MAX_COLUMN_COUNT
-  else
-    files.size
-  end
-end
-
-def calculate_row_count(files, column_count)
-  (files.size.to_f / column_count).ceil
+def calculate_row_count(files)
+  (files.size.to_f / COLUMN_COUNT).ceil
 end
 
 def calculate_max_width(files, margin = 1)
   files.map(&:length).max + margin
 end
 
-def format_files(files, column_count, row_count)
+def format_files(files, row_count)
   sliced_files = files.each_slice(row_count).to_a
-  unless (files.size % column_count).zero?
+  unless (files.size % COLUMN_COUNT).zero?
     (row_count - sliced_files.last.size).times do
       sliced_files.last << nil
     end
