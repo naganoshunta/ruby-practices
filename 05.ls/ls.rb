@@ -36,12 +36,8 @@ end
 
 def format_files(files, row_count)
   sliced_files = files.each_slice(row_count).to_a
-  unless (files.size % COLUMN_COUNT).zero?
-    (row_count - sliced_files.last.size).times do
-      sliced_files.last << nil
-    end
-  end
-  sliced_files.transpose
+  sliced_files.last << nil while sliced_files.last.size < row_count
+  sliced_files.transpose.map(&:compact)
 end
 
 def printf_files(formatted_files, max_width)
