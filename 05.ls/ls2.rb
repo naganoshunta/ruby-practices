@@ -1,15 +1,18 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'optparse'
+
 COLUMN_COUNT = 3
 
 def main
+  options = ARGV.getopts('a')
   path = ARGV[0] || Dir.pwd
-  ls(path)
+  ls(path, option_a: options['a'])
 end
 
-def ls(path)
-  files = read_files(path)
+def ls(path, option_a: false)
+  files = read_files(path, option_a: option_a)
   return if files.empty?
 
   row_count       = calculate_row_count(files)
@@ -18,8 +21,9 @@ def ls(path)
   printf_files(formatted_files, max_width)
 end
 
-def read_files(path)
+def read_files(path, option_a: false)
   raise ArgumentError, "#{File.basename(__FILE__)}: #{path}: No such file or directory" unless File.exist?(path) || File.symlink?(path)
+  return Dir.glob('*', File::FNM_DOTMATCH, base: path) if option_a && File.directory?(path)
   return Dir.glob('*', base: path) if File.directory?(path)
 
   [path]
