@@ -2,7 +2,7 @@
 
 require 'minitest/autorun'
 require 'tmpdir'
-require_relative 'ls'
+require_relative 'ls2'
 
 class LSTest < Minitest::Test
   def test_0_file_directory
@@ -83,5 +83,21 @@ class LSTest < Minitest::Test
   def test_invalid_path
     path = 'invalid_path'
     assert_raises(ArgumentError) { ls(path) }
+  end
+end
+
+class LS2Test < Minitest::Test
+  def test_with_a_option
+    options = { 'a' => true }
+    Dir.mktmpdir do |path|
+      index = 1
+      3.times do
+        File.new("#{path}/file#{index}", 'w')
+        index += 1
+      end
+      File.new("#{path}/.file", 'w')
+      result = capture_io { ls(path, option_a: options['a']) }
+      assert_equal ".     .file file2 \n..    file1 file3 \n", result.first
+    end
   end
 end
