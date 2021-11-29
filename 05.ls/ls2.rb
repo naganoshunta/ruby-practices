@@ -23,8 +23,11 @@ end
 
 def read_files(path, option_a: false)
   raise ArgumentError, "#{File.basename(__FILE__)}: #{path}: No such file or directory" unless File.exist?(path) || File.symlink?(path)
-  return Dir.glob('*', File::FNM_DOTMATCH, base: path) if option_a && File.directory?(path)
-  return Dir.glob('*', base: path) if File.directory?(path)
+
+  if File.directory?(path)
+    dotfile_flag = option_a ? File::FNM_DOTMATCH : 0
+    return Dir.glob('*', dotfile_flag, base: path)
+  end
 
   [path]
 end
