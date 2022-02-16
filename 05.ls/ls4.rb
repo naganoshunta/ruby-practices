@@ -99,16 +99,20 @@ def ls_with_option_l(file_stats)
 end
 
 def generate_format_specifier_of_file_stats(file_stats)
-  type_width        = file_stats.map { |file_stat| file_stat[:type].length }.max
-  permissions_width = file_stats.map { |file_stat| file_stat[:permissions].length }.max
-  link_width        = file_stats.map { |file_stat| file_stat[:link].length }.max
-  user_width        = file_stats.map { |file_stat| file_stat[:user].length }.max
-  group_width       = file_stats.map { |file_stat| file_stat[:group].length }.max
-  size_width        = file_stats.map { |file_stat| file_stat[:size].length }.max
-  timestamp_width   = file_stats.map { |file_stat| file_stat[:timestamp].length }.max
-  name_width        = file_stats.map { |file_stat| file_stat[:name].length }.max
+  [
+    "%<type>#{calculate_max_width_of_file_stats_element(file_stats, :type)}s",
+    "%<permissions>#{calculate_max_width_of_file_stats_element(file_stats, :permissions)}s  ",
+    "%<link>#{calculate_max_width_of_file_stats_element(file_stats, :link)}s ",
+    "%<user>-#{calculate_max_width_of_file_stats_element(file_stats, :user)}s  ",
+    "%<group>-#{calculate_max_width_of_file_stats_element(file_stats, :group)}s  ",
+    "%<size>#{calculate_max_width_of_file_stats_element(file_stats, :size)}s ",
+    "%<timestamp>#{calculate_max_width_of_file_stats_element(file_stats, :timestamp)}s ",
+    "%<name>-#{calculate_max_width_of_file_stats_element(file_stats, :name)}s\n"
+  ].join
+end
 
-  "%<type>#{type_width}s%<permissions>#{permissions_width}s  %<link>#{link_width}s %<user>-#{user_width}s  %<group>-#{group_width}s  %<size>#{size_width}s %<timestamp>#{timestamp_width}s %<name>-#{name_width}s\n"
+def calculate_max_width_of_file_stats_element(file_stats, element)
+  file_stats.map { |file_stat| file_stat[element].length }.max
 end
 
 def translate_octal_type_into_symbol(octal_type)
