@@ -9,7 +9,7 @@ COLUMN_COUNT = 3
 
 def main
   options = ARGV.getopts('l')
-  path = ARGV[0] || Dir.pwd
+  path    = ARGV[0] || Dir.pwd
   ls(path, option_l: options['l'])
 end
 
@@ -147,9 +147,10 @@ def translate_binary_permissions_into_symbols(binary_permissions)
   symbolic_permissions       = []
   binary_permissions.chars.each_with_index do |permission, index|
     symbolic_permissions <<
-      if permission == '1'
+      case permission
+      when '1'
         list_of_permission_symbols[index]
-      else
+      when '0'
         '-'
       end
   end
