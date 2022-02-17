@@ -135,7 +135,9 @@ def translate_octal_permissions_into_symbols(octal_permissions, octal_special_pe
   end
 
   binary_special_permissions = format('%03b', octal_special_permissions)
-  symbolic_permissions = overwrite_symbols_with_special_permissions(symbolic_permissions, binary_special_permissions)
+  symbolic_permissions = overwrite_symbols_with_suid(symbolic_permissions, binary_special_permissions[0])
+  symbolic_permissions = overwrite_symbols_with_sgid(symbolic_permissions, binary_special_permissions[1])
+  symbolic_permissions = overwrite_symbols_with_stickybit(symbolic_permissions, binary_special_permissions[2])
 
   symbolic_permissions.join
 end
@@ -155,35 +157,44 @@ def translate_binary_permissions_into_symbols(binary_permissions)
   symbolic_permissions
 end
 
-def overwrite_symbols_with_special_permissions(symbolic_permissions, binary_special_permissions)
-  return symbolic_permissions if binary_special_permissions == '000'
+def overwrite_symbols_with_suid(symbolic_permissions, suid_permission)
+  return symbolic_permissions if suid_permission == '0'
 
-  if binary_special_permissions[0] == '1'
-    symbolic_permissions[0][2] =
-      if symbolic_permissions[0][2] == 'x'
-        's'
-      elsif symbolic_permissions[0][2] == '-'
-        'S'
-      end
-  end
+  symbolic_permissions[0][2] =
+    case symbolic_permissions[0][2]
+    when 'x'
+      's'
+    when '-'
+      'S'
+    end
 
-  if binary_special_permissions[1] == '1'
-    symbolic_permissions[1][2] =
-      if symbolic_permissions[1][2] == 'x'
-        's'
-      elsif symbolic_permissions[1][2] == '-'
-        'S'
-      end
-  end
+  symbolic_permissions
+end
 
-  if binary_special_permissions[2] == '1'
-    symbolic_permissions[2][2] =
-      if symbolic_permissions[2][2] == 'x'
-        't'
-      elsif symbolic_permissions[2][2] == '-'
-        'T'
-      end
-  end
+def overwrite_symbols_with_sgid(symbolic_permissions, sgid_permission)
+  return symbolic_permissions if sgid_permission == '0'
+
+  symbolic_permissions[1][2] =
+    case symbolic_permissions[1][2]
+    when 'x'
+      's'
+    when '-'
+      'S'
+    end
+
+  symbolic_permissions
+end
+
+def overwrite_symbols_with_stickybit(symbolic_permissions, stickybit_permission)
+  return symbolic_permissions if stickybit_permission == '0'
+
+  symbolic_permissions[2][2] =
+    case symbolic_permissions[2][2]
+    when 'x'
+      't'
+    when '-'
+      'T'
+    end
 
   symbolic_permissions
 end
