@@ -194,8 +194,7 @@ end
 
 def generate_timestamp(time)
   timestamp = []
-  timestamp << time.strftime('%_m')
-  timestamp << time.strftime('%_d')
+  timestamp << time.strftime('%_m %_d')
   timestamp <<
     if time.to_date.between?(Time.now.to_date << 6, Time.now.to_date >> 6)
       time.strftime('%H:%M')
