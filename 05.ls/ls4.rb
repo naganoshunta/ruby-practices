@@ -66,8 +66,7 @@ def generate_format_specifier(column_count, max_width)
 end
 
 def read_file_stats(path, files)
-  file_stats = []
-  files.each do |file|
+  files.map do |file|
     file_stat                 = {}
     fs                        = File.lstat("#{path}/#{file}")
     octal_type                = format('%06o', fs.mode)[0..1]
@@ -83,10 +82,8 @@ def read_file_stats(path, files)
     file_stat[:name]          = generate_file_name(path, file)
     file_stat[:blocks]        = fs.blocks
 
-    file_stats << file_stat
+    file_stat
   end
-
-  file_stats
 end
 
 def ls_with_option_l(file_stats)
@@ -128,10 +125,9 @@ def translate_octal_type_into_symbol(octal_type)
 end
 
 def translate_octal_permissions_into_symbols(octal_permissions, octal_special_permissions)
-  symbolic_permissions = []
-  octal_permissions.chars.each do |octal_permission|
+  symbolic_permissions = octal_permissions.chars.map do |octal_permission|
     binary_permissions = format('%03b', octal_permission)
-    symbolic_permissions << translate_binary_permissions_into_symbols(binary_permissions)
+    translate_binary_permissions_into_symbols(binary_permissions)
   end
 
   binary_special_permissions = format('%03b', octal_special_permissions)
@@ -144,18 +140,14 @@ end
 
 def translate_binary_permissions_into_symbols(binary_permissions)
   list_of_permission_symbols = %w[r w x]
-  symbolic_permissions       = []
-  binary_permissions.chars.each_with_index do |permission, index|
-    symbolic_permissions <<
-      case permission
-      when '1'
-        list_of_permission_symbols[index]
-      when '0'
-        '-'
-      end
+  binary_permissions.chars.map.with_index do |permission, index|
+    case permission
+    when '1'
+      list_of_permission_symbols[index]
+    when '0'
+      '-'
+    end
   end
-
-  symbolic_permissions
 end
 
 def overwrite_symbols_with_suid(symbolic_permissions, suid_permission)
