@@ -67,20 +67,20 @@ end
 
 def read_file_stats(path, files)
   files.map do |file|
-    file_stat                 = {}
-    fs                        = File.lstat("#{path}/#{file}")
-    octal_type                = format('%06o', fs.mode)[0..1]
-    octal_permissions         = format('%06o', fs.mode)[3..-1]
-    octal_special_permissions = format('%06o', fs.mode)[2]
-    file_stat[:type]          = translate_octal_type_into_symbol(octal_type)
-    file_stat[:permissions]   = translate_octal_permissions_into_symbols(octal_permissions, octal_special_permissions)
-    file_stat[:link]          = fs.nlink.to_s
-    file_stat[:user]          = Etc.getpwuid(fs.uid).name
-    file_stat[:group]         = Etc.getgrgid(fs.gid).name
-    file_stat[:size]          = fs.size.to_s
-    file_stat[:timestamp]     = generate_timestamp(fs.mtime)
-    file_stat[:name]          = generate_file_name(path, file)
-    file_stat[:blocks]        = fs.blocks
+    file_stat                = {}
+    fs                       = File.lstat("#{path}/#{file}")
+    octal_type               = format('%06o', fs.mode)[0..1]
+    octal_permission         = format('%06o', fs.mode)[3..-1]
+    octal_special_permission = format('%06o', fs.mode)[2]
+    file_stat[:type]         = translate_octal_type_into_symbol(octal_type)
+    file_stat[:permission]   = translate_octal_permission_into_symbols(octal_permission, octal_special_permission)
+    file_stat[:link]         = fs.nlink.to_s
+    file_stat[:user]         = Etc.getpwuid(fs.uid).name
+    file_stat[:group]        = Etc.getgrgid(fs.gid).name
+    file_stat[:size]         = fs.size.to_s
+    file_stat[:timestamp]    = generate_timestamp(fs.mtime)
+    file_stat[:name]         = generate_file_name(path, file)
+    file_stat[:blocks]       = fs.blocks
 
     file_stat
   end
@@ -98,7 +98,7 @@ end
 def generate_format_specifier_of_file_stats(file_stats)
   [
     "%<type>#{calculate_max_width_of_file_stats_element(file_stats, :type)}s",
-    "%<permissions>#{calculate_max_width_of_file_stats_element(file_stats, :permissions)}s  ",
+    "%<permission>#{calculate_max_width_of_file_stats_element(file_stats, :permission)}s  ",
     "%<link>#{calculate_max_width_of_file_stats_element(file_stats, :link)}s ",
     "%<user>-#{calculate_max_width_of_file_stats_element(file_stats, :user)}s  ",
     "%<group>-#{calculate_max_width_of_file_stats_element(file_stats, :group)}s  ",
@@ -124,23 +124,21 @@ def translate_octal_type_into_symbol(octal_type)
   }[octal_type]
 end
 
-def translate_octal_permissions_into_symbols(octal_permissions, octal_special_permissions)
-  symbolic_permissions = octal_permissions.chars.map do |octal_permission|
-    binary_permissions = format('%03b', octal_permission)
-    translate_binary_permissions_into_symbols(binary_permissions)
+def translate_octal_permission_into_symbols(octal_permission, octal_special_permission)
+  symbolic_permission = octal_permission.chars.map do |octal_permission|
+    binary_permission = format('%03b', octal_permission)
+    translate_binary_permission_into_symbols(binary_permission)
   end
 
-  binary_special_permissions = format('%03b', octal_special_permissions)
-  symbolic_permissions = overwrite_symbols_with_suid(symbolic_permissions, binary_special_permissions[0])
-  symbolic_permissions = overwrite_symbols_with_sgid(symbolic_permissions, binary_special_permissions[1])
-  symbolic_permissions = overwrite_symbols_with_stickybit(symbolic_permissions, binary_special_permissions[2])
+  binary_special_permission = format('%03b', octal_special_permission)
+  symbolic_permission = overwrite_symbols_with_special_permission(symbolic_permission, binary_special_permission)
 
-  symbolic_permissions.join
+  symbolic_permission.join
 end
 
-def translate_binary_permissions_into_symbols(binary_permissions)
+def translate_binary_permission_into_symbols(binary_permission)
   list_of_permission_symbols = %w[r w x]
-  binary_permissions.chars.map.with_index do |permission, index|
+  binary_permission.chars.map.with_index do |permission, index|
     case permission
     when '1'
       list_of_permission_symbols[index]
@@ -150,46 +148,20 @@ def translate_binary_permissions_into_symbols(binary_permissions)
   end
 end
 
-def overwrite_symbols_with_suid(symbolic_permissions, suid_permission)
-  return symbolic_permissions if suid_permission == '0'
+def overwrite_symbols_with_special_permission(symbolic_permission, binary_special_permission)
+  return symbolic_permission if binary_special_permission == '000'
 
-  symbolic_permissions[0][2] =
-    case symbolic_permissions[0][2]
-    when 'x'
-      's'
-    when '-'
-      'S'
-    end
+  list_of_special_permission_symbols = %w[s s t]
+  binary_special_permission.chars.each_with_index do |permission, index|
+    symbolic_permission[index][2] =
+      if permission == '1' && symbolic_permission[index][2] == 'x'
+        list_of_special_permission_symbols[index]
+      elsif permission == '1' && symbolic_permission[index][2] == '-'
+        list_of_special_permission_symbols[index].upcase
+      end
+  end
 
-  symbolic_permissions
-end
-
-def overwrite_symbols_with_sgid(symbolic_permissions, sgid_permission)
-  return symbolic_permissions if sgid_permission == '0'
-
-  symbolic_permissions[1][2] =
-    case symbolic_permissions[1][2]
-    when 'x'
-      's'
-    when '-'
-      'S'
-    end
-
-  symbolic_permissions
-end
-
-def overwrite_symbols_with_stickybit(symbolic_permissions, stickybit_permission)
-  return symbolic_permissions if stickybit_permission == '0'
-
-  symbolic_permissions[2][2] =
-    case symbolic_permissions[2][2]
-    when 'x'
-      't'
-    when '-'
-      'T'
-    end
-
-  symbolic_permissions
+  symbolic_permission
 end
 
 def generate_timestamp(time)
