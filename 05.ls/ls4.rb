@@ -125,10 +125,11 @@ def translate_octal_type_into_symbol(octal_type)
 end
 
 def translate_octal_permission_into_symbols(octal_permission, octal_special_permission)
-  symbolic_permission = octal_permission.chars.map do |permission|
-    binary_permission = format('%03b', permission)
-    translate_binary_permission_into_symbols(binary_permission)
-  end
+  symbolic_permission =
+    octal_permission.chars.map do |permission|
+      binary_permission = format('%03b', permission)
+      translate_binary_permission_into_symbols(binary_permission)
+    end
 
   binary_special_permission = format('%03b', octal_special_permission)
   symbolic_permission       = overwrite_symbols_with_special_permission(symbolic_permission, binary_special_permission)
