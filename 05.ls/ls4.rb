@@ -19,10 +19,10 @@ def ls(path, option_l: false)
 
   if option_l
     file_stats = read_file_stats(path, files)
-    return ls_with_option_l(file_stats)
+    return ls_in_long_format(file_stats)
   end
 
-  ls_with_no_options(files)
+  ls_in_default_format(files)
 end
 
 def read_files(path)
@@ -32,7 +32,7 @@ def read_files(path)
   [path]
 end
 
-def ls_with_no_options(files)
+def ls_in_default_format(files)
   row_count       = calculate_row_count(files)
   max_width       = calculate_max_width(files)
   formatted_files = format_files(files, row_count)
@@ -86,7 +86,7 @@ def read_file_stats(path, files)
   end
 end
 
-def ls_with_option_l(file_stats)
+def ls_in_long_format(file_stats)
   format_specifier = generate_format_specifier_of_file_stats(file_stats)
 
   puts "total #{file_stats.map { |file_stat| file_stat[:blocks] }.sum}"
