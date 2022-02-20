@@ -149,19 +149,14 @@ def translate_binary_permission_into_symbols(binary_permission)
 end
 
 def overwrite_symbols_with_special_permission(symbolic_permission, binary_special_permission)
-  return symbolic_permission if binary_special_permission == '000'
-
   list_of_special_permission_symbols = %w[s s t]
-  binary_special_permission.chars.each_with_index do |permission, index|
-    symbolic_permission[index][2] =
-      if permission == '1' && symbolic_permission[index][2] == 'x'
-        list_of_special_permission_symbols[index]
-      elsif permission == '1' && symbolic_permission[index][2] == '-'
-        list_of_special_permission_symbols[index].upcase
-      end
+  symbolic_permission.map.with_index do |permission, index|
+    if binary_special_permission[index] == '1'
+      symbol        = list_of_special_permission_symbols[index]
+      permission[2] = permission[2] == '-' ? symbol.upcase : symbol
+    end
+    permission
   end
-
-  symbolic_permission
 end
 
 def generate_timestamp(time)
