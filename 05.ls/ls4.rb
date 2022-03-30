@@ -104,7 +104,7 @@ def generate_format_specifier_of_file_stats(file_stats)
     "%<group>-#{calculate_max_width_of_file_stats_element(file_stats, :group)}s  ",
     "%<size>#{calculate_max_width_of_file_stats_element(file_stats, :size)}s ",
     "%<timestamp>#{calculate_max_width_of_file_stats_element(file_stats, :timestamp)}s ",
-    "%<name>-#{calculate_max_width_of_file_stats_element(file_stats, :name)}s\n"
+    "%<name>s\n"
   ].join
 end
 
