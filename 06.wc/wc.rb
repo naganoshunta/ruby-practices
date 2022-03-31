@@ -32,7 +32,9 @@ def generate_wc_tables(paths)
     wc_tables << generate_wc_table(path)
   end
 
-  add_total_row(wc_tables)
+  return wc_tables if wc_tables.size <= 1
+
+  wc_tables << calculate_totals(wc_tables)
 end
 
 def generate_wc_table(path)
@@ -48,17 +50,13 @@ def generate_wc_table(path)
   }
 end
 
-def add_total_row(wc_tables)
-  return wc_tables if wc_tables.size <= 1
-
-  total_row = {
+def calculate_totals(wc_tables)
+  {
     line_count: calculate_total_lines(wc_tables),
     word_count: calculate_total_words(wc_tables),
     bytesize: calculate_total_bytesize(wc_tables),
     file_name: 'total'
   }
-
-  wc_tables << total_row
 end
 
 def output_wc(wc_tables, option_l: false)
