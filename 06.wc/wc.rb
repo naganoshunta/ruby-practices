@@ -34,7 +34,7 @@ def generate_wc_tables(paths)
 
   return wc_tables if wc_tables.size <= 1
 
-  wc_tables << calculate_totals(wc_tables)
+  wc_tables << generate_total_row(wc_tables)
 end
 
 def generate_wc_table(path)
@@ -50,13 +50,17 @@ def generate_wc_table(path)
   }
 end
 
-def calculate_totals(wc_tables)
+def generate_total_row(wc_tables)
   {
-    line_count: calculate_total_lines(wc_tables),
-    word_count: calculate_total_words(wc_tables),
-    bytesize: calculate_total_bytesize(wc_tables),
+    line_count: calculate_total(wc_tables, :line_count),
+    word_count: calculate_total(wc_tables, :word_count),
+    bytesize: calculate_total(wc_tables, :bytesize),
     file_name: 'total'
   }
+end
+
+def calculate_total(wc_tables, key)
+  wc_tables.map { |wt| wt[key] }.compact.sum
 end
 
 def output_wc(wc_tables, option_l: false)
@@ -81,36 +85,6 @@ end
 
 def count_bytesize(str)
   str.bytesize
-end
-
-def calculate_total_lines(wc_tables)
-  total_lines = 0
-  wc_tables.each do |wc_table|
-    next if wc_table[:line_count].nil?
-
-    total_lines += wc_table[:line_count]
-  end
-  total_lines
-end
-
-def calculate_total_words(wc_tables)
-  total_words = 0
-  wc_tables.each do |wc_table|
-    next if wc_table[:word_count].nil?
-
-    total_words += wc_table[:word_count]
-  end
-  total_words
-end
-
-def calculate_total_bytesize(wc_tables)
-  total_bytesize = 0
-  wc_tables.each do |wc_table|
-    next if wc_table[:bytesize].nil?
-
-    total_bytesize += wc_table[:bytesize]
-  end
-  total_bytesize
 end
 
 main if __FILE__ == $PROGRAM_NAME
