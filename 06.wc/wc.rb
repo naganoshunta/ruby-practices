@@ -5,17 +5,17 @@ require 'optparse'
 
 def main
   options = ARGV.getopts('l')
-  wc(ARGV, option_l: options['l'])
+  output_wc(ARGV, option_l: options['l'])
 end
 
-def wc(paths, option_l: false)
-  return wc_from_stdin if paths.empty?
+def output_wc(paths, option_l: false)
+  return output_wc_of_stdin if paths.empty?
 
   wc_tables = generate_wc_tables(paths)
-  output_wc(wc_tables, option_l: option_l)
+  output_wc_of_files(wc_tables, option_l: option_l)
 end
 
-def wc_from_stdin
+def output_wc_of_stdin
   str = $stdin.read
   wc_table = {
     line_count: count_lines(str),
@@ -23,6 +23,18 @@ def wc_from_stdin
     bytesize: count_bytesize(str)
   }
   printf "%<line_count>8s%<word_count>8s%<bytesize>8s\n", wc_table
+end
+
+def output_wc_of_files(wc_tables, option_l: false)
+  wc_tables.each do |wc_table|
+    if wc_table[:error_message].nil?
+      next printf "%<line_count>8s %<file_name>s\n", wc_table if option_l
+
+      printf "%<line_count>8s%<word_count>8s%<bytesize>8s %<file_name>s\n", wc_table
+    else
+      printf "%<error_message>s\n", wc_table
+    end
+  end
 end
 
 def generate_wc_tables(paths)
@@ -61,18 +73,6 @@ end
 
 def calculate_total(wc_tables, key)
   wc_tables.map { |wt| wt[key] }.compact.sum
-end
-
-def output_wc(wc_tables, option_l: false)
-  wc_tables.each do |wc_table|
-    if wc_table[:error_message].nil?
-      next printf "%<line_count>8s %<file_name>s\n", wc_table if option_l
-
-      printf "%<line_count>8s%<word_count>8s%<bytesize>8s %<file_name>s\n", wc_table
-    else
-      printf "%<error_message>s\n", wc_table
-    end
-  end
 end
 
 def count_lines(str)
